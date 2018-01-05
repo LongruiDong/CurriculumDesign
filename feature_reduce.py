@@ -59,15 +59,21 @@ X_train1,X_test1,y_train1,y_test1=train_test_split(data_1,label_1,test_size=130,
 X_train2,X_test2,y_train2,y_test2=train_test_split(data_2,label_2,test_size=80,random_state=0,stratify=label_2)
 
 #对训练数据和测试数据降维
+print("对训练数据和测试数据降维")
+t0=time()
 lda_1=LinearDiscriminantAnalysis(solver='svd')
 lda_1=lda_1.fit(X_train1,y_train1)
 X_train1_new=lda_1.transform(X_train1)
 X_test1_new=lda_1.transform(X_test1)
+print("transformed on data1 done in %0.3fs" % (time() - t0)) 
 
+t0=time()
 lda_2=LinearDiscriminantAnalysis(solver='svd')
 lda_2=lda_2.fit(X_train2,y_train2)
 X_train2_new=lda_2.transform(X_train2)
 X_test2_new=lda_2.transform(X_test2)
+print("transformed on data1 done in %0.3fs" % (time() - t0))
+
 #输出降维后的数据集信息
 print("Total 1th transformed dataset size:")
 print("n_samples_train: %d" % X_train1_new.shape[0])
@@ -81,10 +87,13 @@ print("n_samples_test: %d" % X_test2_new.shape[0])
 print("n_features_test: %d" % X_test2_new.shape[1])
 #使用lda进行分类验证
 #使用5折交叉验证来展示分类效果
+print("使用5折交叉验证来展示对训练数据的分类效果")
+t0=time()
 clf1=LinearDiscriminantAnalysis(solver='lsqr',shrinkage='auto')
 clf2=LinearDiscriminantAnalysis(solver='lsqr',shrinkage='auto')
 scores1=cross_val_score(clf1, X_train1_new, y_train1, cv=5)
 scores2=cross_val_score(clf2, X_train2_new, y_train2, cv=5)
+print("done in %0.3fs" % (time() - t0))
 
 #print("5-fold cross validation scores:")
 print("5-fold cross validation accuracy on data1: %0.2f (+/- %0.2f)" % (scores1.mean(), scores1.std() * 2))
@@ -92,9 +101,11 @@ print("5-fold cross validation accuracy on data2: %0.2f (+/- %0.2f)" % (scores2.
 
 
 #使用训练好的分类器对测试数据进行预测
+print("使用lda分类器先对训练数据进行训练，再对测试数据进行预测:")
+t0=time()
 y_test1_pred=clf1.fit(X_train1_new, y_train1).predict(X_test1_new)
 y_test2_pred=clf2.fit(X_train2_new, y_train2).predict(X_test2_new)
-
+print("done in %0.3fs" % (time() - t0))
 #计算测试数据集上的准确率
 comp1=y_test1_pred-y_test1#比较预测的结果和真实类标
 comp2=y_test2_pred-y_test2
@@ -128,11 +139,7 @@ prediction_titles1 = [title(y_test1_pred, y_test1, target_names1, i)
 prediction_titles2 = [title(y_test2_pred, y_test2, target_names2, i)  
                      for i in range(y_test2_pred.shape[0])]  
                     
-'''
-plot the result of the prediction on a portion of the test set 1  
-'''
+
+print("画图展示分类效果：")
 plot_gallery(X_test1, prediction_titles1, h1, w1, 10, 13)
-'''
-plot the result of the prediction on a portion of the test set 2  
-'''
 plot_gallery(X_test2, prediction_titles2, h2, w2, 10, 8)
