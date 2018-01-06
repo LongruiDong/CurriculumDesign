@@ -5,12 +5,16 @@
 from __future__ import print_function
 import matplotlib.pyplot as plt
 from time import time
-import logging  
+import logging 
 
+import itertools
 import numpy as np
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 from sklearn.model_selection import train_test_split
 from sklearn.model_selection import cross_val_score
+from sklearn.metrics import cohen_kappa_score
+from sklearn.metrics import confusion_matrix
+
 
 print(__doc__)
 
@@ -114,6 +118,63 @@ ac_rate2=np.sum(comp2==0)/X_test2_new.shape[0]
 
 print("Accuracy on test data on data1: %0.4f" %ac_rate1)
 print("Accuracy on test data on data2: %0.4f" %ac_rate2)
+#计算kappa score
+kappa_1=cohen_kappa_score(y_test1, y_test1_pred)
+kappa_2=cohen_kappa_score(y_test2, y_test2_pred)
+print("Cohen’s kappa score on test data on data1: %0.4f" %kappa_1)
+print("Cohen’s kappa score on test data on data2: %0.4f" %kappa_2)
+
+def plot_confusion_matrix(cm, path, classes, 
+                          normalize=False,
+                          title='Confusion matrix',
+                          cmap=plt.cm.Blues):
+    """
+    This function prints and plots the confusion matrix.
+    Normalization can be applied by setting `normalize=True`.
+    """
+    if normalize:
+        cm = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
+        print("Normalized confusion matrix")
+    else:
+        print('Confusion matrix, without normalization')
+
+    print(cm)
+
+    plt.imshow(cm, interpolation='nearest', cmap=cmap)
+    plt.title(title)
+    plt.colorbar()
+    tick_marks = np.arange(len(classes))
+    plt.xticks(tick_marks, classes, rotation=45)
+    plt.yticks(tick_marks, classes)
+
+    fmt = '.2f' if normalize else 'd'
+    thresh = cm.max() / 2.
+    #是否填混淆矩阵的数字
+    for i, j in itertools.product(range(cm.shape[0]), range(cm.shape[1])):
+        plt.text(j, i, format(cm[i, j], fmt),
+                 horizontalalignment="center",
+                 color="white" if cm[i, j] > thresh else "black")
+    #
+    plt.tight_layout()
+    plt.ylabel('True label')
+    plt.xlabel('Predicted label')
+    fig = plt.gcf()
+    fig.set_size_inches(18.5, 10.5)
+    fig.savefig(path+"\\"+"confusionmatrix.png", dpi=100)
+
+#计算混淆矩阵
+cnf_matrix_1 = confusion_matrix(y_test1, y_test1_pred)
+cnf_matrix_2 = confusion_matrix(y_test2, y_test2_pred)
+np.set_printoptions(precision=2)
+
+plt.figure()
+plot_confusion_matrix(cnf_matrix_1, PICTURE_PATH1, classes=target_names1, normalize=True,
+                      title='Normalized confusion matrix on data1')
+plt.figure()
+plot_confusion_matrix(cnf_matrix_2, PICTURE_PATH2, classes=target_names2, normalize=True,
+                      title='Normalized confusion matrix on data2')
+
+plt.show()
 
 def plot_gallery(images, titles, h, w, n_row, n_col):  
     """Helper function to plot a gallery of portraits"""  
