@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 '''
 基于LDA，对人脸数据集进行维数约减，并计算分类准确率
+Created by Longrui Dong --2018.01.05
 '''
 from __future__ import print_function
 import matplotlib.pyplot as plt
